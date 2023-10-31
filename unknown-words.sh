@@ -1469,7 +1469,9 @@ call_curl() {
     fi
     echo >> "$response_headers"
     response_code=$(perl -e '$_=<>; $_=0 unless s#^HTTP/[\d.]+ (\d+).*#$1#;print;' "$response_headers")
-    if [ "$response_code" -ne 429 ] && [ "$response_code" -ne 503 ]; then
+    if [ "$response_code" -ne 429 ] &&
+       [ "$response_code" -ne 502 ] &&
+       [ "$response_code" -ne 503 ]; then
       cat "$response_body"
       rm -f "$response_body"
       if [ -z "$keep_headers" ]; then

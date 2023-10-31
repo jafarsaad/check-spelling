@@ -18,6 +18,9 @@ catching 'templatesz'
 # GitHub SHAs (markdown)
 (?:\[`?[0-9a-f]+`?\]\(https:/|)/(?:www\.|)github\.com(?:/[^/\s"]+){2,}(?:/[^/\s")]+)(?:[0-9a-f]+(?:[-0-9a-zA-Z/#.]*|)\b|)
 
+# GitHub header
+\bx-served-by: cache-[a-z]+-[a-z]+\d+
+
 # regex
 \\b
 
