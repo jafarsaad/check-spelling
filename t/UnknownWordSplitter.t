@@ -10,7 +10,7 @@ use File::Basename;
 use File::Temp qw/ tempfile tempdir /;
 use IO::Capture::Stderr;
 use Test::More;
-plan tests => 52;
+plan tests => 55;
 
 use_ok('CheckSpelling::UnknownWordSplitter');
 
@@ -273,3 +273,41 @@ $capture->stop();
 my $warnings = $capture->read();
 is($warnings, "$dirname/block-delimiters.list:1:Block delimiters must come in pairs (uneven-block-delimiters)
 ");
+
+$dirname = tempdir();
+($fh, $filename) = tempfile();
+close $fh;
+$ENV{PATH}='/usr/bin';
+$ENV{INPUT_USE_MAGIC_FILE}=1;
+CheckSpelling::UnknownWordSplitter::init($dirname);
+$output_dir=CheckSpelling::UnknownWordSplitter::split_file($filename);
+check_output_file("$output_dir/skipped", "appears to be a binary file ('inode/x-empty'). (binary-file)
+");
+
+$dirname = tempdir();
+($fh, $filename) = tempfile();
+print $fh "\x00"x5;
+close $fh;
+CheckSpelling::UnknownWordSplitter::init($dirname);
+$CheckSpelling::UnknownWordSplitter::INPUT_LARGEST_FILE = 0;
+$CheckSpelling::UnknownWordSplitter::INPUT_LARGEST_FILE = undef;
+$output_dir=CheckSpelling::UnknownWordSplitter::split_file($filename);
+check_output_file("$output_dir/skipped", "appears to be a binary file ('application/octet-stream'). (binary-file)
+");
+
+my $hunspell_dictionary_path = tempdir();
+$ENV{'hunspell_dictionary_path'} = $hunspell_dictionary_path;
+open $fh, '>', "$hunspell_dictionary_path/test.dic";
+close $fh;
+open $fh, '>', "$hunspell_dictionary_path/test.aff";
+close $fh;
+
+$dirname = tempdir();
+($fh, $filename) = tempfile();
+print $fh "\x05"x5;
+close $fh;
+CheckSpelling::UnknownWordSplitter::init($dirname);
+$output_dir=CheckSpelling::UnknownWordSplitter::split_file($filename);
+is(-e "$output_dir/skipped", undef);
+
+$ENV{INPUT_USE_MAGIC_FILE}='';
